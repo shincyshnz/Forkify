@@ -44,6 +44,7 @@ export const loadSearchResults = async (query) => {
             publisher: rec.publisher,
             image: rec.image_url,
         }));
+        state.search.page = 1;
     } catch (error) {
         console.log(error);
         throw error;

@@ -1926,6 +1926,7 @@ const loadSearchResults = async (query)=>{
                 publisher: rec.publisher,
                 image: rec.image_url
             }));
+        state.search.page = 1;
     } catch (error) {
         console.log(error);
         throw error;
@@ -2520,8 +2521,6 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _view = require("./View");
 var _viewDefault = parcelHelpers.interopDefault(_view);
-var _iconsSvg = require("url:../../img/icons.svg");
-var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class resultView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector(".results");
     _errorMessage = "No recipes found for your query. Please try again!";
@@ -2547,7 +2546,7 @@ class resultView extends (0, _viewDefault.default) {
 }
 exports.default = new resultView();
 
-},{"./View":"625uW","url:../../img/icons.svg":"loVOp","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hwhZC":[function(require,module,exports) {
+},{"./View":"625uW","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hwhZC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _view = require("./View");
