@@ -71,10 +71,19 @@ const controlServings = (newServings) => {
   recipeView.update(model.state.recipe);
 }
 
+const controlAddBookmarks = () => {
+  (!model.state.recipe.bookmarked) ? model.addBookmark(model.state.recipe)
+    : model.deleteBookmark(model.state.recipe.id);
+  recipeView.update(model.state.recipe);
+
+  console.log(model.state.recipe);
+}
+
 // SUBSCRIBER - pass the controller functions to Publisher
 function init() {
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
+  recipeView.addHandlerAddBookmark(controlAddBookmarks);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
 } init();
