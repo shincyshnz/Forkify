@@ -75,6 +75,9 @@ export const updateServings = (newServings) => {
     state.recipe.servings = newServings;
 };
 
+const persistBookmarks = () => {
+    localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+}
 
 export const addBookmark = (recipe) => {
     // Add bookmark
@@ -84,6 +87,9 @@ export const addBookmark = (recipe) => {
     if (recipe.id === state.recipe.id) {
         state.recipe.bookmarked = true;
     }
+
+    // Update localstorage
+    persistBookmarks();
 }
 
 export const deleteBookmark = (id) => {
@@ -94,4 +100,13 @@ export const deleteBookmark = (id) => {
     if (id === state.recipe.id) {
         state.recipe.bookmarked = false;
     }
+
+    // Update localstorage
+    persistBookmarks();
 }
+
+const init = function () {
+    const storage = localStorage.getItem('bookmarks');
+    if (storage) state.bookmarks = JSON.parse(storage);
+}
+init();

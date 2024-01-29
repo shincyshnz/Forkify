@@ -86,8 +86,13 @@ const controlAddBookmarks = () => {
   bookmarksView.render(model.state.bookmarks);
 }
 
+const controlBookmarksOnPageLoad = () => {
+  bookmarksView.render(model.state.bookmarks);
+}
+
 // SUBSCRIBER - pass the controller functions to Publisher
 function init() {
+  bookmarksView.addHandlerBookmarks(controlBookmarksOnPageLoad);
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
   recipeView.addHandlerAddBookmark(controlAddBookmarks);

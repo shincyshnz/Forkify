@@ -649,8 +649,12 @@ const controlAddBookmarks = ()=>{
     // 3. Render bookmarks
     (0, _bookmarksViewDefault.default).render(_model.state.bookmarks);
 };
+const controlBookmarksOnPageLoad = ()=>{
+    (0, _bookmarksViewDefault.default).render(_model.state.bookmarks);
+};
 // SUBSCRIBER - pass the controller functions to Publisher
 function init() {
+    (0, _bookmarksViewDefault.default).addHandlerBookmarks(controlBookmarksOnPageLoad);
     (0, _recipeViewDefault.default).addHandlerRender(controlRecipes);
     (0, _recipeViewDefault.default).addHandlerUpdateServings(controlServings);
     (0, _recipeViewDefault.default).addHandlerAddBookmark(controlAddBookmarks);
@@ -1962,18 +1966,30 @@ const updateServings = (newServings)=>{
     });
     state.recipe.servings = newServings;
 };
+const persistBookmarks = ()=>{
+    localStorage.setItem("bookmarks", JSON.stringify(state.bookmarks));
+};
 const addBookmark = (recipe)=>{
     // Add bookmark
     state.bookmarks.push(recipe);
     // mark current recipe as bookmark
     if (recipe.id === state.recipe.id) state.recipe.bookmarked = true;
+    // Update localstorage
+    persistBookmarks();
 };
 const deleteBookmark = (id)=>{
     const index = state.bookmarks.findIndex((el)=>el.id === id);
     state.bookmarks.splice(index, 1);
     // mark current recipe as not bookmarks
     if (id === state.recipe.id) state.recipe.bookmarked = false;
+    // Update localstorage
+    persistBookmarks();
 };
+const init = function() {
+    const storage = localStorage.getItem("bookmarks");
+    if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
 
 },{"./config":"k5Hzs","./View/helper":"hhSf0","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"k5Hzs":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -3251,6 +3267,9 @@ class bookmarksView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector(".bookmarks__list");
     _errorMessage = "No bookmarks yet. Find a nice recipe and bookmark it!.";
     _message = "";
+    addHandlerBookmarks(handler) {
+        window.addEventListener("load", handler);
+    }
     _generateMarkup() {
         return this._data.map((bookmark)=>(0, _previewViewDefault.default).render(bookmark, false)).join("");
     }
