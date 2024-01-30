@@ -1,4 +1,5 @@
 import * as model from './model';
+import { MODAL_CLOSE_SEC } from './config';
 import recipeView from './View/recipeView';
 import searchView from './View/searchView';
 import resultView from './View/resultView';
@@ -92,10 +93,28 @@ const controlBookmarksOnPageLoad = () => {
   bookmarksView.render(model.state.bookmarks);
 }
 
-const controlAddRecipe = (newRecipe) => {
-  console.log(newRecipe);
+const controlAddRecipe = async (newRecipe) => {
+  try {
+    // show loading spinner
+    addRecipeView.renderSpinner();
 
-  // Upload new recipe data
+    // Upload new recipe data
+    await model.uploadRecipe(newRecipe);
+
+    //Render Recipe
+    recipeView.render(model.state.recipe);
+
+    // Success message 
+    addRecipeView.renderMessage();
+
+    // close form window
+    setTimeout(() => {
+      addRecipeView.toggleWindow();
+    }, MODAL_CLOSE_SEC * 1000);
+  } catch (error) {
+    addRecipeView.renderError(error.message);
+  }
+
 }
 
 // SUBSCRIBER - pass the controller functions to Publisher
