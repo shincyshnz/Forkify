@@ -1,6 +1,6 @@
 import View from "./View";
 
-class previewView extends View {
+class PreviewView extends View {
     _parentElement = '';
     _errorMessage = 'No recipes found for your query. Please try again!';
     _message = '';
@@ -22,4 +22,4 @@ class previewView extends View {
     }
 }
 
-export default new previewView()
+export default new PreviewView()

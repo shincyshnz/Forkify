@@ -4,6 +4,7 @@ import searchView from './View/searchView';
 import resultView from './View/resultView';
 import paginationView from './View/paginationView';
 import bookmarksView from './View/bookmarksView';
+import addRecipeView from './View/addRecipeView';
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
@@ -37,11 +38,12 @@ const controlRecipes = async () => {
 
 const controlSearchResults = async () => {
   try {
-    resultView.renderSpinner();
-
     // 1. Get search query
     const query = searchView.getQuery();
-    if (!query) return;
+    if (!query && query === '') return;
+
+    // Spinner
+    resultView.renderSpinner();
 
     // 2) Load search results
     await model.loadSearchResults(query);
@@ -90,6 +92,12 @@ const controlBookmarksOnPageLoad = () => {
   bookmarksView.render(model.state.bookmarks);
 }
 
+const controlAddRecipe = (newRecipe) => {
+  console.log(newRecipe);
+
+  // Upload new recipe data
+}
+
 // SUBSCRIBER - pass the controller functions to Publisher
 function init() {
   bookmarksView.addHandlerBookmarks(controlBookmarksOnPageLoad);
@@ -98,4 +106,5 @@ function init() {
   recipeView.addHandlerAddBookmark(controlAddBookmarks);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
+  addRecipeView.addHandlerUpload(controlAddRecipe);
 } init();
