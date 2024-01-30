@@ -666,6 +666,10 @@ const controlAddRecipe = async (newRecipe)=>{
         (0, _recipeViewDefault.default).render(_model.state.recipe);
         // Success message 
         (0, _addRecipeViewDefault.default).renderMessage();
+        // Render bookmark view
+        (0, _bookmarksViewDefault.default).render(_model.state.bookmarks);
+        // change id in the url
+        window.history.pushState(null, "", `#${_model.state.recipe.id}`);
         // close form window
         setTimeout(()=>{
             (0, _addRecipeViewDefault.default).toggleWindow();
@@ -1931,6 +1935,7 @@ parcelHelpers.export(exports, "addBookmark", ()=>addBookmark);
 parcelHelpers.export(exports, "deleteBookmark", ()=>deleteBookmark);
 parcelHelpers.export(exports, "uploadRecipe", ()=>uploadRecipe);
 var _config = require("./config");
+// import { getJSON, sendJSON } from "./View/helper";
 var _helper = require("./View/helper");
 const state = {
     recipe: {},
@@ -1960,7 +1965,7 @@ const createRecipeObject = (data)=>{
 };
 const loadRecipe = async (id)=>{
     try {
-        const data = await (0, _helper.getJSON)(`${(0, _config.API_URL)}${id}`);
+        const data = await (0, _helper.AJAX)(`${(0, _config.API_URL)}${id}?key=${(0, _config.KEY)}`);
         state.recipe = createRecipeObject(data);
         if (state.bookmarks.some((bookmark)=>bookmark.id === id)) state.recipe.bookmarked = true;
         else state.recipe.bookmarked = false;
@@ -1971,12 +1976,15 @@ const loadRecipe = async (id)=>{
 const loadSearchResults = async (query)=>{
     try {
         state.search.query = query;
-        const { data } = await (0, _helper.getJSON)(`${(0, _config.API_URL)}?search=${query}`);
+        const { data } = await (0, _helper.AJAX)(`${(0, _config.API_URL)}?search=${query}&key=${(0, _config.KEY)}`);
         state.search.results = data?.recipes.map((rec)=>({
                 id: rec.id,
                 title: rec.title,
                 publisher: rec.publisher,
-                image: rec.image_url
+                image: rec.image_url,
+                ...rec.key && {
+                    key: rec.key
+                }
             }));
         state.search.page = 1;
     } catch (error) {
@@ -2019,7 +2027,7 @@ const deleteBookmark = (id)=>{
 const uploadRecipe = async (newRecipe)=>{
     try {
         const ingredients = Object.entries(newRecipe).filter((entry)=>entry[0].startsWith("ingredient") && entry[1] !== "").map((ing)=>{
-            const ingArr = ing[1].replaceAll(" ", "").split(",");
+            const ingArr = ing[1].split(",").map((el)=>el.trim());
             if (ingArr.length !== 3) throw new Error("Wrong ingredient format. Please use the correct format");
             const [quantity, unit, description] = ing[1].replaceAll(" ", "").split(",");
             return {
@@ -2037,7 +2045,7 @@ const uploadRecipe = async (newRecipe)=>{
             servings: +newRecipe.servings,
             ingredients
         };
-        const data = await (0, _helper.sendJSON)(`${(0, _config.API_URL)}?key=${(0, _config.KEY)}`, recipe);
+        const data = await (0, _helper.AJAX)(`${(0, _config.API_URL)}?key=${(0, _config.KEY)}`, recipe);
         state.recipe = createRecipeObject(data);
         addBookmark(state.recipe);
     } catch (error) {
@@ -2101,8 +2109,7 @@ exports.export = function(dest, destName, get) {
 },{}],"hhSf0":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "getJSON", ()=>getJSON);
-parcelHelpers.export(exports, "sendJSON", ()=>sendJSON);
+parcelHelpers.export(exports, "AJAX", ()=>AJAX);
 var _config = require("../config");
 const timeout = function(s) {
     return new Promise(function(_, reject) {
@@ -2111,29 +2118,15 @@ const timeout = function(s) {
         }, s * 1000);
     });
 };
-const getJSON = async (url)=>{
+const AJAX = async (url, uploadData)=>{
     try {
-        const fetchPro = fetch(url);
-        const res = await Promise.race([
-            fetchPro,
-            timeout((0, _config.TIMEOUT_SEC))
-        ]);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message} ${res.status}`);
-        return data;
-    } catch (error) {
-        throw error;
-    }
-};
-const sendJSON = async (url, uploadData)=>{
-    try {
-        const fetchPro = fetch(url, {
+        const fetchPro = uploadData ? fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(uploadData)
-        });
+        }) : fetch(url);
         const res = await Promise.race([
             fetchPro,
             timeout((0, _config.TIMEOUT_SEC))
@@ -2144,7 +2137,35 @@ const sendJSON = async (url, uploadData)=>{
     } catch (error) {
         throw error;
     }
-};
+} // export const getJSON = async (url) => {
+ //     try {
+ //         const fetchPro = fetch(url);
+ //         const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+ //         const data = await res.json();
+ //         if (!res.ok) throw new Error(`${data.message} ${res.status}`);
+ //         return data;
+ //     } catch (error) {
+ //         throw (error);
+ //     }
+ // }
+ // export const sendJSON = async (url, uploadData) => {
+ //     try {
+ //         const fetchPro = fetch(url, {
+ //             method: 'POST',
+ //             headers: {
+ //                 'Content-Type': 'application/json'
+ //             },
+ //             body: JSON.stringify(uploadData)
+ //         });
+ //         const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
+ //         const data = await res.json();
+ //         if (!res.ok) throw new Error(`${data.message} ${res.status}`);
+ //         return data;
+ //     } catch (error) {
+ //         throw (error);
+ //     }
+ // }
+;
 
 },{"../config":"k5Hzs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"71gF4":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -2219,8 +2240,10 @@ class RecipeView extends (0, _viewDefault.default) {
           </div>
         </div>
     
-        <div class="recipe__user-generated">
-          
+        <div class="recipe__user-generated ${this._data.key ? "" : "hidden"}">
+          <svg>
+            <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+          </svg>
         </div>
         <button class="btn--round btn--bookmark">
           <svg class="">
@@ -2680,6 +2703,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _view = require("./View");
 var _viewDefault = parcelHelpers.interopDefault(_view);
+var _iconsSvg = require("url:../../img/icons.svg");
+var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class PreviewView extends (0, _viewDefault.default) {
     _parentElement = "";
     _errorMessage = "No recipes found for your query. Please try again!";
@@ -2695,6 +2720,11 @@ class PreviewView extends (0, _viewDefault.default) {
                 <div class="preview__data">
                     <h4 class="preview__title">${this._data.title}</h4>
                     <p class="preview__publisher">${this._data.publisher}</p>
+                    <div class="preview__user-generated ${this._data.key ? "" : "hidden"}">
+                        <svg>
+                        <use href="${0, _iconsSvgDefault.default}#icon-user"></use>
+                        </svg>
+                    </div>
                 </div>
                 </a>
             </li> `;
@@ -2702,7 +2732,7 @@ class PreviewView extends (0, _viewDefault.default) {
 }
 exports.default = new PreviewView();
 
-},{"./View":"625uW","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hwhZC":[function(require,module,exports) {
+},{"./View":"625uW","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","url:../../img/icons.svg":"loVOp"}],"hwhZC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _view = require("./View");
@@ -2789,7 +2819,7 @@ var _iconsSvg = require("url:../../img/icons.svg");
 var _iconsSvgDefault = parcelHelpers.interopDefault(_iconsSvg);
 class AddRecipeView extends (0, _viewDefault.default) {
     _parentElement = document.querySelector(".upload");
-    _message = "Recipe was succesfully upload.";
+    _message = "Recipe was succesfully uploaded.";
     _window = document.querySelector(".add-recipe-window");
     _overlay = document.querySelector(".overlay");
     _btnOpen = document.querySelector(".nav__btn--add-recipe");
